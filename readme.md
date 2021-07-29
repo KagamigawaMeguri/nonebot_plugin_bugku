@@ -23,7 +23,7 @@ bugku_password=bugku的密码
 bugku_own=机器人拥有者的扣扣号
 ```
 
-在`bot.py`目录的父目录(上一级)建立`res`文件夹(不存在会自动创建)，用于存放`captcha.png`、`cookies.json`、`userinfo.json`，可按需求自行更改
+在`bot.py`目录的父目录(上一级)建立`res`文件夹(不存在会自动创建)，用于存放`captcha.png`、`cookies`、`userinfo`，可按需求自行更改
 
 ### 命令
 
