@@ -97,7 +97,7 @@ async def imme_detect_send(res):
         await bugku.finish()
 
 
-@scheduler.scheduled_job('cron', minute='*/1', id='detect_online')
+@scheduler.scheduled_job('cron', minute='*/15', id='detect_online')
 async def cron_detect():
     if not config.LoginStatus:
         return
@@ -108,6 +108,7 @@ async def cron_detect():
         res = await request_detect()
         if '请登录' in res.text:
             config.LoginStatus = False
+            send_msgs(bot, config.bugku_own, 'private', ["Cookies失效，请重新登录"])
             await bugku.finish()
         match_list = await match_data_solve(res)
         if len(match_list) == 0:
