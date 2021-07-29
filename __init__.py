@@ -1,4 +1,3 @@
-import nonebot
 from .data_source import *
 from nonebot import on_command
 from nonebot.adapters.cqhttp import MessageSegment, GroupMessageEvent, PrivateMessageEvent
@@ -119,7 +118,7 @@ async def cron_detect():
                 print("定时任务触发成功")
                 tip = "Master！侦测到新的公开房间"
                 msg = "【房间名】 {}\n【赛题】 {}\n【时间】 {}\n【名额】 {}  【入场费】 {}"
-                msgs = [msg.format(*i) for i in match_list].insert(0, tip)
+                msgs = [tip] + [msg.format(*i) for i in match_list]
                 send_msgs(bot, user.user, user.user_type, msgs)
 
 

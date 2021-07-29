@@ -2,27 +2,7 @@ import json
 import httpx
 from .config import *
 from bs4 import BeautifulSoup
-
-
-# 将自定义的类转化为字典，dumps方法使用
-def obj_to_dict(obj):
-    d = {'__class__': obj.__class__.__name__, '__module__': obj.__module__}
-    d.update(obj.__dict__)
-    return d
-
-
-# 将字典转化为自定义的类，loads方法使用
-def dict_to_obj(d):
-    if '__class__' in d:
-        class_name = d.pop('__class__')
-        module_name = d.pop('__module__')
-        module = __import__(module_name)
-        class_ = getattr(module, class_name)
-        args = dict((key.encode('ascii'), value) for key, value in d.items())
-        instance = class_(**args)
-    else:
-        instance = d
-    return instance
+import pickle
 
 
 def check_captcha(text: str) -> bool:
@@ -54,9 +34,8 @@ async def sava_cookies(res):
     for key, value in res.cookies.items():
         dic[key] = value
     config.LoginCookies = dic
-    cookies_json = json.dumps(dic)
-    with open(file_cookies, 'w+') as f:
-        f.write(cookies_json)
+    with open(file_cookies, 'wb+') as f:
+        pickle.dump(dic, f)
 
 
 async def get_cookies() -> dict:
@@ -64,26 +43,22 @@ async def get_cookies() -> dict:
     if len(config.LoginCookies) != 0:
         return config.LoginCookies
     elif file_cookies.exists():
-        with open(file_cookies, 'r') as f:
-            cookies = f.read().strip()
-            if cookies != '':
-                return json.loads(cookies)
+        with open(file_cookies, 'rb') as f:
+            return pickle.load(f)
     return {}
 
 
 async def save_userinfo(data: list):
     """将用户数据保存在本地"""
-    with open(file_userinfo, 'w+') as f:
-        f.write(json.dumps(data, default=obj_to_dict))
+    with open(file_userinfo, 'wb+') as f:
+        pickle.dump(data, f)
 
 
 async def get_userinfo() -> list:
     """从本地文件中获取备份的用户数据"""
     if file_userinfo.exists():
-        with open(file_userinfo, 'r') as f:
-            userinfo = f.read().strip()
-            if userinfo != '':
-                return json.loads(userinfo, default=dict_to_obj)
+        with open(file_userinfo, 'rb') as f:
+            return pickle.load(f)
     return []
 
 

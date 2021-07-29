@@ -31,7 +31,7 @@ current_path = Path.cwd()
 res_path = (current_path.parent / 'res').resolve()
 img_captcha = res_path / 'captcha.png'
 img_test = res_path / '1.jpg'
-file_cookies = res_path / 'cookies.json'
-file_userinfo = res_path / 'userinfo.json'
+file_cookies = res_path / 'cookies'
+file_userinfo = res_path / 'userinfo'
 if not res_path.exists():
     os.mkdir(res_path)
