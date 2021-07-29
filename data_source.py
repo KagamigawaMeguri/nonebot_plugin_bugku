@@ -1,8 +1,13 @@
+import dataclasses
 import json
 import httpx
 from .config import *
 from bs4 import BeautifulSoup
-import pickle
+import base64
+
+
+def b64en(text):
+    return str(base64.b64encode(text), encoding='utf-8')
 
 
 def check_captcha(text: str) -> bool:
@@ -33,32 +38,36 @@ async def sava_cookies(res):
     dic = {}
     for key, value in res.cookies.items():
         dic[key] = value
-    config.LoginCookies = dic
-    with open(file_cookies, 'wb+') as f:
-        pickle.dump(dic, f)
+    lib.LoginCookies = dic
+    with open(file_cookies, 'w+') as f:
+        json.dump(dic, f)
 
 
 async def get_cookies() -> dict:
     """从config或本地文件中获取保存的cookies"""
-    if len(config.LoginCookies) != 0:
-        return config.LoginCookies
+    if len(lib.LoginCookies) != 0:
+        return lib.LoginCookies
     elif file_cookies.exists():
-        with open(file_cookies, 'rb') as f:
-            return pickle.load(f)
+        with open(file_cookies, 'r') as f:
+            return json.load(f)
     return {}
 
 
 async def save_userinfo(data: list):
     """将用户数据保存在本地"""
-    with open(file_userinfo, 'wb+') as f:
-        pickle.dump(data, f)
+    r = []
+    for i in data:
+        r.append(dataclasses.asdict(i))
+    with open(file_userinfo, 'w+') as f:
+        json.dump(r, f)
 
 
 async def get_userinfo() -> list:
     """从本地文件中获取备份的用户数据"""
     if file_userinfo.exists():
-        with open(file_userinfo, 'rb') as f:
-            return pickle.load(f)
+        with open(file_userinfo, 'r') as f:
+            result = json.load(f)
+        return [User(**i) for i in result]
     return []
 
 
@@ -100,8 +109,7 @@ async def get_captcha():
     url = "https://ctf.bugku.com/captcha.html"
     async with httpx.AsyncClient() as client:
         res = await client.get(url)
-        with open(img_captcha, 'wb+') as f:
-            f.write(res.content)
+        lib.captcha = res.content
     await sava_cookies(res)
 
 

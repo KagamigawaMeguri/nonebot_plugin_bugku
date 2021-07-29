@@ -17,8 +17,8 @@ init = on_command("init", priority=10)
 async def initialize(bot: Bot, event: Event, state: T_State):
     if not config.InitStatus:
         config.LoginStatus = False
-        config.LoginCookies = await get_cookies()
-        config.UserInfo = await get_userinfo()
+        lib.LoginCookies = await get_cookies()
+        lib.UserInfo = await get_userinfo()
         await init.finish("系统初始化成功，请输入/start执行下一步")
     else:
         await init.finish("系统已初始化完毕，请勿重复初始化")
@@ -27,9 +27,9 @@ async def initialize(bot: Bot, event: Event, state: T_State):
 @start.handle()
 async def start_up(bot: Bot, event: GroupMessageEvent, state: T_State):
     user = User(str(event.group_id), 'group')
-    if user not in config.UserInfo:
-        config.UserInfo.append(user)
-        await save_userinfo(config.UserInfo)
+    if user not in lib.UserInfo:
+        lib.UserInfo.append(user)
+        await save_userinfo(lib.UserInfo)
         await start.finish("已将本群加入通知列表，请使用/bugku命令即时检测当前房间情况")
     else:
         await start.finish("本群已加入配置，请勿重复初始化")
@@ -38,9 +38,9 @@ async def start_up(bot: Bot, event: GroupMessageEvent, state: T_State):
 @start.handle()
 async def start_up(bot: Bot, event: PrivateMessageEvent, state: T_State):
     user = User(str(event.user_id), 'private')
-    if user not in config.UserInfo:
-        config.UserInfo.append(user)
-        await save_userinfo(config.UserInfo)
+    if user not in lib.UserInfo:
+        lib.UserInfo.append(user)
+        await save_userinfo(lib.UserInfo)
         await start.finish("已将你的QQ加入通知列表，请使用/bugku命令检测当前房间情况")
     else:
         await start.finish("你的QQ已加入配置，请勿重复初始化")
@@ -114,7 +114,7 @@ async def cron_detect():
             await bugku.finish()
         else:
             await sava_cookies(res)
-            for user in config.UserInfo:
+            for user in lib.UserInfo:
                 print("定时任务触发成功")
                 tip = "Master！侦测到新的公开房间"
                 msg = "【房间名】 {}\n【赛题】 {}\n【时间】 {}\n【名额】 {}  【入场费】 {}"
@@ -124,7 +124,8 @@ async def cron_detect():
 
 async def pre_login():
     await get_captcha()
-    await bugku.send(('登录验证码' + MessageSegment.image(f"file:///{img_captcha}")))
+    with open(img_captcha, 'rb+') as f:
+        await bugku.send(('登录验证码' + MessageSegment.image(f"base64://{b64en(lib.captcha)}")))
     await bugku.pause("Cookie失效，请输入验证码重新登录")  # 暂停handle，准备接收验证码，然后执行下一个handle
 
 
@@ -135,7 +136,7 @@ async def login_check(captcha):
         await bugku.finish("登录成功，请重新输入指令")
         await sava_cookies(res)
     elif '验证码错误' in res.text:
-        await bugku.reject("验证码错误，登录失败，请重新登录")
+        await bugku.finish("验证码错误，登录失败，请重新登录")
     else:
         config.LoginStatus = False
         await bugku.finish("登录失败，请检查")

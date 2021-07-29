@@ -8,10 +8,8 @@ from dataclasses import dataclass
 class Config(BaseSettings):
     InitStatus: bool = False
     LoginStatus: bool = False
-    LoginCookies: dict = {}
     MatchDict: dict = []
     MatchList: list = []
-    UserInfo: list = []
     bugku_username: str
     bugku_password: str
 
@@ -25,13 +23,19 @@ class User:
     user_type: str
 
 
+class Lib:
+    UserInfo: list = []
+    LoginCookies: dict = {}
+    captcha: bytes
+
+
 global_config = get_driver().config
 config = Config(**global_config.dict())
+lib = Lib()
 current_path = Path.cwd()
 res_path = (current_path.parent / 'res').resolve()
-img_captcha = res_path / 'captcha.png'
 img_test = res_path / '1.jpg'
-file_cookies = res_path / 'cookies'
-file_userinfo = res_path / 'userinfo'
+file_cookies = res_path / 'cookies.json'
+file_userinfo = res_path / 'userinfo.json'
 if not res_path.exists():
     os.mkdir(res_path)
