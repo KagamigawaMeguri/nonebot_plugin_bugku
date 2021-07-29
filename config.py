@@ -1,3 +1,4 @@
+import os
 from nonebot import get_driver
 from pydantic import BaseSettings
 from pathlib import Path
@@ -32,3 +33,5 @@ img_captcha = res_path / 'captcha.png'
 img_test = res_path / '1.jpg'
 file_cookies = res_path / 'cookies.json'
 file_userinfo = res_path / 'userinfo.json'
+if not res_path.exists():
+    os.mkdir(res_path)
