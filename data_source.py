@@ -6,8 +6,14 @@ from bs4 import BeautifulSoup
 import base64
 
 
-def b64en(text):
-    return str(base64.b64encode(text), encoding='utf-8')
+def b64en(s):
+    if not isinstance(s, bytes):
+        s = s.encode()
+    return base64.b64encode(s).decode()
+
+
+# def b64en(text):
+#     return str(base64.b64encode(text), encoding='utf-8')
 
 
 def check_captcha(text: str) -> bool:
@@ -30,6 +36,7 @@ def check_data(data: list) -> bool:
     if hs in config.MatchDict:
         return True
     else:
+        add_data(data)
         return False
 
 
@@ -109,6 +116,9 @@ async def get_captcha():
     url = "https://ctf.bugku.com/captcha.html"
     async with httpx.AsyncClient() as client:
         res = await client.get(url)
+        print('++++++++++++++++++++')
+        with open(img_captcha, 'wb+') as f:
+            f.write(res.content)
         lib.captcha = res.content
     await sava_cookies(res)
 

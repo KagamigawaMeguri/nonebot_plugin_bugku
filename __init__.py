@@ -8,9 +8,9 @@ from nonebot import require
 from .cron_send import *
 
 scheduler = require('nonebot_plugin_apscheduler').scheduler
-bugku = on_command("bugku")
-start = on_command("start")
-init = on_command("init", priority=10)
+bugku = on_command("bugku", priority=5)
+start = on_command("start", priority=5)
+init = on_command("init", priority=5)
 
 
 @init.handle()
@@ -118,14 +118,13 @@ async def cron_detect():
                 print("定时任务触发成功")
                 tip = "Master！侦测到新的公开房间"
                 msg = "【房间名】 {}\n【赛题】 {}\n【时间】 {}\n【名额】 {}  【入场费】 {}"
-                msgs = [tip] + [msg.format(*i) for i in match_list]
+                msgs = [tip] + [msg.format(*i) for i in match_list if not check_data(i)]
                 send_msgs(bot, user.user, user.user_type, msgs)
 
 
 async def pre_login():
     await get_captcha()
-    with open(img_captcha, 'rb+') as f:
-        await bugku.send(('登录验证码' + MessageSegment.image(f"base64://{b64en(lib.captcha)}")))
+    await bugku.send(('登录验证码' + MessageSegment.image(f"base64://{b64en(lib.captcha)}")))
     await bugku.pause("Cookie失效，请输入验证码重新登录")  # 暂停handle，准备接收验证码，然后执行下一个handle
 
 
